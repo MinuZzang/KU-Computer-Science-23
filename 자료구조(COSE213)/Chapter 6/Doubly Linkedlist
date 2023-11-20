@@ -1,0 +1,171 @@
+//Doubly linkedlist 실습
+typedef struct _node { //구조체 선언
+	int data;
+	struct _node * prev;
+	struct _node * next;
+
+}node;
+
+void init_list(node* start) { //리스트 초기화
+	start -> prev = NULL;
+	start->next = NULL;
+}
+
+void show_init(node* start, int* size) {
+	node* ptr = start;
+
+	if (*size == 0) { //비였으면
+		printf("List is empty\n");
+	}
+	else{
+		printf("[ ");
+		for (int i = 0; i < *size; i++) {
+			printf("%d ", ptr->data);
+			ptr = ptr->next;
+		}
+
+		printf("]\n");
+
+	}
+}
+
+void inserting(node** start, int pos, int val, int * size) {
+	node* new_node;
+	if (*size == 0) { //사이즈가 0이면
+		(*start)->data = val;
+	}
+	else { //0이 아니라면
+		new_node = (node*)malloc(sizeof(node)); // 새 노드에 메모리 할당
+
+		if (pos == 0) { //begin삽입
+			new_node->prev = NULL;
+			new_node->data = val;
+			new_node->next = *start;
+
+			(*start)->prev = new_node;
+			*start = new_node; //start갱신
+		}
+		else if (pos == *size) { //end 삽입
+			node* ptr = *start;
+
+			for (int i = 0; i < *size - 1; i++) {
+				ptr = ptr->next; //마지막 노드까지 이동
+			}
+
+			new_node->next = NULL;
+			new_node->prev = ptr;
+			new_node->data = val;
+
+			ptr->next = new_node;
+		
+			
+		}
+		else { //중간에 삽입
+			node* temp = *start;
+			for (int i = 0; i < pos - 1; i++) { //원하는 위치까지 start 이동시킨다
+				temp = temp->next;
+			}
+			new_node->data = val;
+			new_node->next = temp->next;
+			new_node->prev = temp;
+
+			temp->next = new_node;
+			new_node->next->prev = new_node;
+
+		}
+	}
+
+	(*size)++;//사이즈 증가시킨다
+}
+
+void deleting(node** start, int pos, int * size) {
+	if (pos == 0) { //처음 노드 제거
+		node* temp = *start;
+		*start = (*start)->next;
+
+		if (*start != NULL) {
+			(*start)->prev = NULL;
+		}
+
+		free(temp);
+	}
+	else if (pos == *size - 1) { //마지막 노드 제거
+		node* temp = *start;
+		for (int i = 0; i < pos - 1; i++) {
+			temp = temp->next;
+		}
+		node* deleted_node = temp->next;
+		temp->next = NULL;
+
+		free(deleted_node);
+	}
+	else { //중간 노드 제거
+		node* temp = *start;
+		for (int i = 0; i < pos; i++) {
+			temp = temp->next;
+		}
+		temp->prev->next = temp->next;
+		temp->next->prev = temp->prev;
+
+		free(temp);
+	}
+
+	(*size)--;//사이즈 줄이기
+}
+
+
+int main(void) {
+	node * start = (node*)malloc(sizeof(node)); //start노드 메모리 할당
+	init_list(start);
+	int size = 0;
+	int input;
+
+	printf("Doubly linked ㅣist 값 : ");
+	show_init(start, &size);
+
+	while (1) {
+
+		printf("실행할 작업을 선택하세요  %d:Inserting,  %d:Deleting\n", 1, 2);
+		scanf("%d", &input);
+
+		if (input == 1) { //inserting
+			int val, pos;
+			do {
+				printf("Inserting 위치 입력 (%d에서 %d 사이) : ", 0,size);
+				scanf("%d", &pos);
+				if (pos > size || pos < 0) {
+					printf("잘못된 위치를 입력했습니다.\n");
+				}
+
+			} while ((pos > size) || (pos < 0));
+			printf("삽입할 정수형 데이터 값 입력 : ");
+			scanf("%d", &val);
+			inserting(&start, pos, val, &size);
+			
+		}
+		else if (input == 2) { //deleting
+			int pos;
+			if (size == 0) {
+				printf("링크드리스트가 비어 있습니다. 삽입만 가능합니다\n");
+			}
+			else {
+				do {
+					printf("Deleting 노드 위치 입력: ");
+					scanf("%d", &pos);
+					if (pos < 0 || pos >= size) {
+						printf("잘못된 위치를 입력했습니다. %d와 %d사이를 입력해주세요\n", 0, size - 1);
+					}
+				} while (pos < 0 || pos >= size);
+				deleting(&start, pos, &size);
+			}
+			
+		}  
+
+		printf("Doubly linked list 값 : ");
+		show_init(start, &size);
+	}
+
+
+
+	return 0;
+}
